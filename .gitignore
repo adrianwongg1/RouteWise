@@ -1,0 +1,38 @@
+node_modules/
+.expo/
+dist/
+web-build/
+*.log
+.env
+.env.local
+.DS_Store
+
+# Lambda zip artifacts
+backend/*/function.zip
+backend/*/package/
+
+# Terraform
+infra/.terraform/
+infra/terraform.tfstate
+infra/terraform.tfstate.backup
+infra/terraform.tfvars
+infra/build/
+infra/tfplan
+crash.log
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+
+# IDE
+.idea/
+.vscode/
+
+# Local Claude Code settings
+.claude/
+
+PLAN.md
+SPEC.md

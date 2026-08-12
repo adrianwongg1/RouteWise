@@ -1,0 +1,36 @@
+{
+  "expo": {
+    "name": "RouteWise",
+    "slug": "routewise",
+    "version": "1.0.0",
+    "sdkVersion": "54.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.cloudhacks.routewise"
+    },
+    "plugins": [
+      [
+        "expo-notifications",
+        {
+          "aps-environment": "development"
+        }
+      ],
+      "expo-asset"
+    ],
+    "android": {
+      "package": "com.cloudhacks.routewise"
+    },
+    "splash": {
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "dd48e086-481e-46b4-80b8-ee133a60795c"
+      }
+    },
+    "owner": "eyerockee"
+  }
+}

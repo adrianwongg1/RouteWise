@@ -1,0 +1,7 @@
+# Optional. The prediction engine is a free, offline heuristic (see
+# backend/lambdaA/handler.py) — no API key needed anywhere in this stack.
+# Every variable in variables.tf already has a sensible default, so you don't
+# strictly need a terraform.tfvars file at all. Copy this to terraform.tfvars
+# only if you want to override a default, e.g. a different region:
+#
+# aws_region = "us-east-1"
