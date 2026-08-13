@@ -1,5 +1,5 @@
 import { StackScreenProps } from '@react-navigation/stack';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -17,6 +17,7 @@ import { subscribe } from '../api/subscribe';
 import ExplanationCard from '../components/ExplanationCard';
 import FlightCard from '../components/FlightCard';
 import RiskBadge from '../components/RiskBadge';
+import { PredictResponse } from '../types';
 
 type Props = StackScreenProps<RootStackParamList, 'Result'>;
 
@@ -27,11 +28,43 @@ function extractTime(value: string | null): string {
   return m ? m[1] : '00:00';
 }
 
-export default function ResultScreen({ route }: Props) {
-  const { prediction, flightDate } = route.params;
+// Result has a real URL now (see App.tsx's `linking` config), so it can be
+// hit directly, bookmarked, or reloaded. The prediction object doesn't
+// round-trip through a URL query string — React Navigation stringifies it
+// as the literal text "[object Object]" and never parses it back, so
+// `route.params` on a fresh load is present but garbage, not absent.
+// Checking the actual shape (not just truthiness) is what catches that.
+function isValidResultParams(
+  params: unknown
+): params is { prediction: PredictResponse; flightDate: string } {
+  if (!params || typeof params !== 'object') return false;
+  const { prediction, flightDate } = params as Record<string, unknown>;
+  return (
+    !!prediction &&
+    typeof prediction === 'object' &&
+    'risk_level' in prediction &&
+    'predicted_probability' in prediction &&
+    typeof flightDate === 'string'
+  );
+}
+
+export default function ResultScreen({ route, navigation }: Props) {
   const pushToken = usePushToken();
   const [loading, setLoading] = useState(false);
   const [subscribed, setSubscribed] = useState(false);
+  const hasValidParams = isValidResultParams(route.params);
+
+  useEffect(() => {
+    if (!hasValidParams) {
+      navigation.replace('Search');
+    }
+  }, [hasValidParams, navigation]);
+
+  if (!isValidResultParams(route.params)) {
+    return null;
+  }
+
+  const { prediction, flightDate } = route.params;
 
   async function onSubscribe() {
     if (!pushToken) {
@@ -120,6 +153,11 @@ export default function ResultScreen({ route }: Props) {
           </Pressable>
         </View>
       )}
+
+      <View style={styles.spacer} />
+      <Pressable style={styles.searchAgainButton} onPress={() => navigation.navigate('Search')}>
+        <Text style={styles.searchAgainText}>Search another flight</Text>
+      </Pressable>
     </ScrollView>
   );
 }
@@ -151,6 +189,14 @@ const styles = StyleSheet.create({
   confirmed: { backgroundColor: '#dcfce7', borderRadius: 16, padding: 20 },
   confirmedTitle: { fontSize: 18, fontWeight: '800', color: '#166534' },
   confirmedBody: { fontSize: 14, color: '#166534', marginTop: 8, lineHeight: 20 },
+  searchAgainButton: {
+    borderRadius: 12,
+    paddingVertical: 14,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#cbd5e1',
+  },
+  searchAgainText: { color: '#334155', fontSize: 15, fontWeight: '600' },
   webCard: {
     backgroundColor: '#eff6ff',
     borderRadius: 16,

@@ -54,6 +54,20 @@ async function registerForPushNotifications(): Promise<string | null> {
 
 const Stack = createStackNavigator<RootStackParamList>();
 
+// Without this, React Navigation never pushes browser history entries on
+// web — the URL stays fixed and the browser's own back button has nothing
+// to go back to (it navigates away from the app entirely instead of
+// returning to Search). Native ignores this except as a deep-link map.
+const linking = {
+  prefixes: [],
+  config: {
+    screens: {
+      Search: '',
+      Result: 'result',
+    },
+  },
+};
+
 export default function App() {
   const [pushToken, setPushToken] = useState<string | null>(null);
 
@@ -64,7 +78,7 @@ export default function App() {
   return (
     <PushTokenContext.Provider value={pushToken}>
       <SafeAreaProvider>
-        <NavigationContainer>
+        <NavigationContainer linking={linking}>
           <Stack.Navigator
             screenOptions={{
               headerStyle: { backgroundColor: '#0f172a' },

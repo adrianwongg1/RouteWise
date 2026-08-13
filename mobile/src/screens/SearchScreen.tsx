@@ -20,6 +20,9 @@ type Mode = "flight" | "route";
 
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 const TIME_RE = /^\d{2}:\d{2}$/;
+// Distinct from styles.input's text color (#0f172a) so placeholder examples
+// read as hints, not as text you've already typed.
+const PLACEHOLDER_COLOR = "#94a3b8";
 
 function todayISO(): string {
   return new Date().toISOString().slice(0, 10);
@@ -107,6 +110,7 @@ export default function SearchScreen({ navigation }: Props) {
                 value={flightIata}
                 onChangeText={setFlightIata}
                 placeholder="AA101"
+                placeholderTextColor={PLACEHOLDER_COLOR}
                 autoCapitalize="characters"
                 style={styles.input}
               />
@@ -116,6 +120,7 @@ export default function SearchScreen({ navigation }: Props) {
                 value={flightDate}
                 onChangeText={setFlightDate}
                 placeholder="2026-04-20"
+                placeholderTextColor={PLACEHOLDER_COLOR}
                 autoCapitalize="none"
                 style={styles.input}
               />
@@ -128,6 +133,7 @@ export default function SearchScreen({ navigation }: Props) {
                 value={origin}
                 onChangeText={setOrigin}
                 placeholder="LAX"
+                placeholderTextColor={PLACEHOLDER_COLOR}
                 autoCapitalize="characters"
                 style={styles.input}
               />
@@ -137,6 +143,7 @@ export default function SearchScreen({ navigation }: Props) {
                 value={destination}
                 onChangeText={setDestination}
                 placeholder="JFK"
+                placeholderTextColor={PLACEHOLDER_COLOR}
                 autoCapitalize="characters"
                 style={styles.input}
               />
@@ -146,6 +153,7 @@ export default function SearchScreen({ navigation }: Props) {
                 value={flightDate}
                 onChangeText={setFlightDate}
                 placeholder="2026-04-20"
+                placeholderTextColor={PLACEHOLDER_COLOR}
                 autoCapitalize="none"
                 style={styles.input}
               />
@@ -155,6 +163,7 @@ export default function SearchScreen({ navigation }: Props) {
                 value={departureTime}
                 onChangeText={setDepartureTime}
                 placeholder="09:15"
+                placeholderTextColor={PLACEHOLDER_COLOR}
                 autoCapitalize="none"
                 style={styles.input}
               />
