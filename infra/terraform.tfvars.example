@@ -1,7 +1,16 @@
 # Optional. The prediction engine is a free, offline heuristic (see
-# backend/lambdaA/handler.py) — no API key needed anywhere in this stack.
-# Every variable in variables.tf already has a sensible default, so you don't
-# strictly need a terraform.tfvars file at all. Copy this to terraform.tfvars
-# only if you want to override a default, e.g. a different region:
+# backend/lambdaA/handler.py) by default — no API key needed anywhere in
+# this stack. Every variable in variables.tf already has a sensible
+# default, so you don't strictly need a terraform.tfvars file at all. Copy
+# this to terraform.tfvars only if you want to override a default, e.g. a
+# different region, or opt into real flight/weather data:
 #
 # aws_region = "us-east-1"
+#
+# aerodatabox_api_key = "..."
+# Optional. Get a free key at rapidapi.com -> AeroDataBox -> Basic plan.
+# Unlocks: real route/schedule lookup for "Flight #" searches, live
+# status/delay tracking, and landing detection for subscriptions. Without
+# it, predict/monitor run exactly as they do today (offline heuristic only).
+# Weather (api.weather.gov) needs no key and is always on for Route-mode
+# searches within ~7 days, regardless of this setting.

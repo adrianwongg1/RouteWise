@@ -19,11 +19,21 @@ resource "aws_apigatewayv2_api" "this" {
 # $default stage (not a named stage) so the invoke URL has no extra path
 # segment — matches what mobile/.env.example documents and what
 # mobile/src/api/predict.ts + subscribe.ts expect: `${API_BASE_URL}/predict`.
+#
+# default_route_settings throttles at API Gateway, before a request ever
+# reaches Lambda — bounds worst-case cost from a burst/bot/buggy script
+# regardless of caller. Not aimed at a patient attacker pacing under the
+# limit for weeks; the monthly_budget_usd alert is the backstop for that.
 resource "aws_apigatewayv2_stage" "default" {
   api_id      = aws_apigatewayv2_api.this.id
   name        = "$default"
   auto_deploy = true
   tags        = local.tags
+
+  default_route_settings {
+    throttling_rate_limit  = var.throttle_rate_limit
+    throttling_burst_limit = var.throttle_burst_limit
+  }
 }
 
 resource "aws_apigatewayv2_integration" "predict" {

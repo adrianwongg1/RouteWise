@@ -48,25 +48,38 @@ locals {
     monitor = {
       handler_file     = "${path.module}/../backend/lambdaC/handler.py"
       dynamodb_actions = ["dynamodb:Scan", "dynamodb:UpdateItem"]
-      timeout          = 60
+      # Each due subscription can now make a few sequential external HTTP
+      # calls (AeroDataBox + weather) instead of pure in-memory scoring;
+      # several subscriptions due in one 15-min tick, processed sequentially,
+      # could exceed the old 60s. No cost implication — Lambda bills actual
+      # duration, not this ceiling.
+      timeout = 120
     }
   }
 
   function_names = { for k, v in local.functions : k => "${local.name_prefix}-${k}" }
 
-  # predict takes no env vars at all (pure rule-based heuristic, no external
-  # calls) while subscribe/monitor need DYNAMODB_TABLE. Terraform unifies
-  # these into one object type and fills predict's missing key with null —
-  # the `if v != null` filter in lambda.tf strips that synthesized null back
-  # out before it hits `environment.variables` (a map(string) can't hold a
-  # null, so skipping that filter fails at plan time).
+  # predict has one optional env var (AeroDataBox key — null/unset by
+  # default) while subscribe/monitor need DYNAMODB_TABLE, and monitor also
+  # gets the AeroDataBox key. Terraform unifies these into one object type
+  # and fills each function's missing keys with null — the `if v != null`
+  # filter in lambda.tf strips those synthesized nulls back out before they
+  # hit `environment.variables` (a map(string) can't hold a null, so
+  # skipping that filter fails at plan time). This is also why
+  # aerodatabox_api_key's Terraform default is `null` and not `""`: unset
+  # means the key is omitted from the environment entirely, not present as
+  # an empty string, so `os.environ.get("AERODATABOX_API_KEY")` in Python
+  # cleanly returns None with no extra handling needed.
   env_vars = {
-    predict = {}
+    predict = {
+      AERODATABOX_API_KEY = var.aerodatabox_api_key
+    }
     subscribe = {
       DYNAMODB_TABLE = aws_dynamodb_table.subscriptions.name
     }
     monitor = {
-      DYNAMODB_TABLE = aws_dynamodb_table.subscriptions.name
+      DYNAMODB_TABLE      = aws_dynamodb_table.subscriptions.name
+      AERODATABOX_API_KEY = var.aerodatabox_api_key
     }
   }
 }

@@ -21,3 +21,22 @@ variable "budget_alert_email" {
   default     = "adrianwong055@gmail.com"
   description = "Email notified when the budget threshold is crossed."
 }
+
+variable "throttle_rate_limit" {
+  type        = number
+  default     = 5
+  description = "API Gateway steady-state requests/second cap, applied before requests reach Lambda."
+}
+
+variable "throttle_burst_limit" {
+  type        = number
+  default     = 10
+  description = "API Gateway concurrent-burst cap, on top of throttle_rate_limit."
+}
+
+variable "aerodatabox_api_key" {
+  type        = string
+  sensitive   = true
+  default     = null
+  description = "AeroDataBox (RapidAPI) key for flight-number route/status lookups. Leave unset to run predict/monitor in offline-heuristic-only mode (default, matches prior behavior)."
+}
