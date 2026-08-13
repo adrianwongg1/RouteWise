@@ -1,0 +1,13 @@
+[build]
+  base = "mobile"
+  command = "npx expo export --platform web"
+  publish = "dist"
+
+[build.environment]
+  EXPO_PUBLIC_API_BASE_URL = "https://oio6zwaoc9.execute-api.us-west-2.amazonaws.com"
+  NODE_VERSION = "22"
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
