@@ -40,3 +40,23 @@ resource "aws_iam_role_policy" "dynamodb_access" {
     }]
   })
 }
+
+# Separate policy/table from dynamodb_access above: predict and subscribe
+# both need to bump a per-IP counter (see dynamodb.tf's rate_limits table)
+# but predict otherwise has no business touching DynamoDB at all, so this
+# stays its own least-privilege grant rather than folding into the policy
+# above.
+resource "aws_iam_role_policy" "rate_limit_access" {
+  for_each = { for k, v in local.functions : k => v if v.rate_limited }
+  name     = "${local.name_prefix}-${each.key}-ratelimit"
+  role     = aws_iam_role.lambda[each.key].id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect   = "Allow"
+      Action   = ["dynamodb:UpdateItem"]
+      Resource = aws_dynamodb_table.rate_limits.arn
+    }]
+  })
+}

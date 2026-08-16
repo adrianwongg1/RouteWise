@@ -34,6 +34,18 @@ variable "throttle_burst_limit" {
   description = "API Gateway concurrent-burst cap, on top of throttle_rate_limit."
 }
 
+variable "predict_rate_limit_per_minute" {
+  type        = number
+  default     = 10
+  description = "Max /predict requests allowed from a single source IP per 60s window before that caller gets a 429."
+}
+
+variable "subscribe_rate_limit_per_minute" {
+  type        = number
+  default     = 5
+  description = "Max /subscribe requests allowed from a single source IP per 60s window before that caller gets a 429."
+}
+
 variable "aerodatabox_api_key" {
   type        = string
   sensitive   = true

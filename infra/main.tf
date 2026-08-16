@@ -38,16 +38,22 @@ locals {
     predict = {
       handler_file     = "${path.module}/../backend/lambdaA/handler.py"
       dynamodb_actions = []
-      timeout          = 29
+      # Public, request-driven endpoints get the per-IP rate limiter; monitor
+      # is only ever invoked on its own EventBridge schedule (see
+      # eventbridge.tf), never by a caller, so there's nothing to limit.
+      rate_limited = true
+      timeout      = 29
     }
     subscribe = {
       handler_file     = "${path.module}/../backend/lambdaB/handler.py"
       dynamodb_actions = ["dynamodb:PutItem"]
+      rate_limited     = true
       timeout          = 29
     }
     monitor = {
       handler_file     = "${path.module}/../backend/lambdaC/handler.py"
       dynamodb_actions = ["dynamodb:Scan", "dynamodb:UpdateItem"]
+      rate_limited     = false
       # Each due subscription can now make a few sequential external HTTP
       # calls (AeroDataBox + weather) instead of pure in-memory scoring;
       # several subscriptions due in one 15-min tick, processed sequentially,
@@ -72,10 +78,14 @@ locals {
   # cleanly returns None with no extra handling needed.
   env_vars = {
     predict = {
-      AERODATABOX_API_KEY = var.aerodatabox_api_key
+      AERODATABOX_API_KEY   = var.aerodatabox_api_key
+      RATE_LIMIT_TABLE      = aws_dynamodb_table.rate_limits.name
+      RATE_LIMIT_PER_MINUTE = tostring(var.predict_rate_limit_per_minute)
     }
     subscribe = {
-      DYNAMODB_TABLE = aws_dynamodb_table.subscriptions.name
+      DYNAMODB_TABLE        = aws_dynamodb_table.subscriptions.name
+      RATE_LIMIT_TABLE      = aws_dynamodb_table.rate_limits.name
+      RATE_LIMIT_PER_MINUTE = tostring(var.subscribe_rate_limit_per_minute)
     }
     monitor = {
       DYNAMODB_TABLE      = aws_dynamodb_table.subscriptions.name
